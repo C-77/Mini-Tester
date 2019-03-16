@@ -1,0 +1,101 @@
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+import argparse
+import sys
+import time
+
+global starttime
+
+class ZeroScann():
+
+    def __init__(self):
+        self.scan()
+        
+    def scan(self):
+        
+        parser = argparse.ArgumentParser(prog="._w", description="Simple Find Shell in Website")
+        parser.add_argument("-u", dest="domain", help="your url")
+        parser.add_argument("-w", dest="wordlist", help="your wordlsit")
+        args = parser.parse_args()
+        if not args.domain:
+            sys.exit("")
+        if not args.wordlist:
+            sys.exit("")
+            
+        
+        site = args.domain
+        print(f'\033[91mScanner URL\033[0m : \033[92m{site}\n\n')
+        
+        
+       
+        time.sleep(3)
+        if not site.startswith("http://"):
+            site = +site
+        if not site.endswith(""):
+            site = site+""
+        try:
+            pathlist = args.wordlist
+            wlist = open(pathlist, "r")
+            wordlist = wlist.readlines()
+        except FileNotFound as e:
+            print("  \033[91mUpss, Wordlist tidak di temukan!\033[0m")
+            exit()
+        finally:
+            try:
+                wlist.close()
+            except:
+                print("  \033[91mUpss, Wordlist tidak di temukan!\033[0m")
+        
+        user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+        
+        found = []
+        
+        resp_codes = {403 : "403 forbidden", 401 : "401 unauthorized"}
+        
+        starttime = time.time()
+        for psx in wordlist:
+            try:
+                psx = psx.replace("\n", "")
+                url = site+psx
+                req = Request(url, headers={"User-Agent": user_agent})
+                time.sleep(0.1)
+                try:
+                    connection = urlopen(req)
+                    print(f"\033[96m------------\033[33;1m> \033[92mfound: \033[0m{site}"+psx)
+                    found.append(url)
+                    
+                except HTTPError as e:
+                    if e.code == 404:
+                        print(f"\033[96m------------\033[33;1m> \033[91merror: \033[0m{site}"+psx)
+                    else:
+                        print(f"\033[96m------------\033[33;1m> \033[92minfo : \033[33m{site}"+psx,"\033[92mstatus:\033[33m",resp_codes[e.code])
+                        
+                except URLError as e:
+                    sys.exit("\033[31m                Upsss... Error!")
+                except Exception as er:
+                    print("\n\033[96m----> \033[0mKoneksi Internet Anda Buruk!")
+                    print("\n\033[96m----> \033[0mExit Program")
+                    time.sleep(3)
+                    exit()
+            except KeyboardInterrupt as e:
+                
+                exit()
+        
+        if found:
+            print("\n\033[96m----> \033[0mFiles Yg Di Temukan\033[92m")
+            print("\n".join(found))
+            print("\033[96m----> \033[0mTime Elasped: \033[35m%.2f\033[0m Seconds" % float(time.time()-starttime))
+        else:
+            print("\n\033[96m----> \033[0mTidak Di Temukan Files Apapun!")
+            print("\n\033[96m----> \033[0mSepertinya Wordlist Anda Kurang Detail")
+                
+    def banner():
+        
+        info = """\033[33m
+	
+              """
+        return info
+    print(banner())
+                
+if __name__ == '__main__':
+    ZeroScann()
